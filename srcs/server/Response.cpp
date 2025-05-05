@@ -67,12 +67,15 @@ std::string Response::formatResponse() const {
     
     // Ajouter Content-Length s'il n'existe pas déjà
     if (finalHeaders.find("Content-Length") == finalHeaders.end()) {
-        finalHeaders["Content-Length"] = std::to_string(_body.length());
+        std::stringstream lenStream;
+        lenStream << _body.length();
+        finalHeaders["Content-Length"] = lenStream.str();
     }
     
     // Écrire tous les en-têtes
-    for (const std::pair<const std::string, std::string>& header : finalHeaders) {
-        ss << header.first << ": " << header.second << "\r\n";
+    std::map<std::string, std::string>::const_iterator it;
+    for (it = finalHeaders.begin(); it != finalHeaders.end(); ++it) {
+        ss << it->first << ": " << it->second << "\r\n";
     }
     
     ss << "\r\n" << _body;

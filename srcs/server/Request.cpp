@@ -50,7 +50,8 @@ void Request::parseRequest()
     
     // Parse les en-têtes
     while (std::getline(ss, line) && !line.empty() && line != "\r") {
-        if (line.back() == '\r') line.pop_back(); // Enlever le CR si présent
+        if (!line.empty() && line[line.length() - 1] == '\r') 
+            line = line.substr(0, line.length() - 1); // Enlever le CR si présent
         parseHeader(line);
     }
 
@@ -69,8 +70,8 @@ void Request::parseRequestLine(const std::string& line)
     std::istringstream iss(line);
     iss >> _method >> _uri >> _httpVersion;
     // Supprimer le "\r" si présent dans la version HTTP
-    if (!_httpVersion.empty() && _httpVersion.back() == '\r')
-        _httpVersion.pop_back();
+    if (!_httpVersion.empty() && _httpVersion[_httpVersion.length() - 1] == '\r')
+        _httpVersion = _httpVersion.substr(0, _httpVersion.length() - 1);
 }
 
 void Request::parseHeader(const std::string& line)

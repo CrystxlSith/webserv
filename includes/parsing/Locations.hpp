@@ -7,7 +7,7 @@ class Location
 private:
     std::string _path;
     std::string _root;
-    std::string _autoindex;
+    bool _autoindex;
     std::string _cgi_ext;
     std::string _client_max_body_size;
     std::string _upload_path;
@@ -23,7 +23,7 @@ public:
     // Setters
     void setPath(const std::string& path) {_path = path;};
     void setRoot(const std::string& root) {_root = root;};
-    void setAutoindex(const std::string& autoindex) {_autoindex = autoindex;};
+    void setAutoindex(const std::string& autoindex) {_autoindex = (autoindex == "on");};
     void setCgiExt(const std::string& cgi_ext) {_cgi_ext = cgi_ext;};
     void setClientMaxBodySize(const std::string& client_max_body_size) {_client_max_body_size = client_max_body_size;};
     void setUploadPath(const std::string& upload_path) {_upload_path = upload_path;};
@@ -34,7 +34,7 @@ public:
     // Getters
     std::string getPath() const {return _path;};
     std::string getRoot() const {return _root;};
-    std::string getAutoindex() const {return _autoindex;};
+    bool getAutoindex() const {return _autoindex;};
     std::string getCgiExt() const {return _cgi_ext;};
     std::string getClientMaxBodySize() const {return _client_max_body_size;};
     std::string getUploadPath() const {return _upload_path;};

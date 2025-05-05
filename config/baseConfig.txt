@@ -36,6 +36,11 @@ server {
         autoindex off;
         return 301 http://localhost:8080;
     }
+
+    location /favicon.ico {
+        methods GET;
+        root /www/example/images;
+    }
 }
 
 server {
@@ -48,5 +53,10 @@ server {
         index index.html;
         autoindex off;
         return 301 http://localhost:8080;
+    }
+
+    location /favicon.ico {
+        methods GET;
+        root /www/example/images;
     }
 }

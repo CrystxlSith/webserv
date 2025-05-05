@@ -6,24 +6,21 @@ SRC_DIR = srcs
 INC_DIR = includes
 DEP_DIR = deps
 
-# Création des dossiers nécessaires
-$(shell mkdir -p $(OBJ_DIR) $(DEP_DIR))
-
 CC = c++ 
 
-CFLAGS = -Wall -Wextra -Werror -std=c++11
+CFLAGS = -Wall -Wextra -Werror -std=c++98
 
 MAIN = webserv
 
 SRC = ${addsuffix .cpp, ${MAIN}} \
       server/Server.cpp \
       parsing/Config.cpp \
-	  utils/Utils.cpp \
-	  parsing/Locations.cpp \
-	  server/Request.cpp \
-	  server/Response.cpp \
-	  parsing/Files.cpp
-			
+      utils/Utils.cpp \
+      parsing/Locations.cpp \
+      server/Request.cpp \
+      server/Response.cpp \
+      parsing/Files.cpp
+            
 SRC_DIR = srcs
 
 SRCS = $(addprefix $(SRC_DIR)/, $(SRC))
@@ -49,7 +46,11 @@ BOLD = \033[1m
 TOTAL_FILES := $(words $(SRCS))
 CURRENT_FILE = 0
 
-all: $(NAME)
+all: create_dirs $(NAME)
+
+# Création des dossiers nécessaires (maintenant une cible plutôt qu'une directive shell)
+create_dirs:
+	@mkdir -p $(OBJ_DIR) $(DEP_DIR)
 
 $(NAME): $(OBJS)
 	@echo "$(GREEN)$(BOLD)Linking $(NAME)...$(RESET)"
