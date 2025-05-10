@@ -31,7 +31,7 @@ void Response::setStatus(int code)
 {
     _statusCode = code;
     
-    // Mettre à jour le message de statut en fonction du code
+    // update status message based on code
     switch (code) {
         case 200: _statusMessage = "OK"; break;
         case 201: _statusMessage = "Created"; break;
@@ -54,25 +54,25 @@ void Response::setStatus(int code)
 std::string Response::formatResponse() const {
     std::stringstream ss;
     
-    // Ligne de statut
+    // status line
     ss << _httpVersion << " " << _statusCode << " " << _statusMessage << "\r\n";
     
-    // En-têtes existants
+    // existing headers
     std::map<std::string, std::string> finalHeaders = _headers;
     
-    // Ajouter Content-Type s'il n'existe pas déjà
+    // add Content-Type if it doesn't exist
     if (finalHeaders.find("Content-Type") == finalHeaders.end()) {
         finalHeaders["Content-Type"] = "text/html";
     }
     
-    // Ajouter Content-Length s'il n'existe pas déjà
+    // add Content-Length if it doesn't exist
     if (finalHeaders.find("Content-Length") == finalHeaders.end()) {
         std::stringstream lenStream;
         lenStream << _body.length();
         finalHeaders["Content-Length"] = lenStream.str();
     }
     
-    // Écrire tous les en-têtes
+    // write all headers
     std::map<std::string, std::string>::const_iterator it;
     for (it = finalHeaders.begin(); it != finalHeaders.end(); ++it) {
         ss << it->first << ": " << it->second << "\r\n";
