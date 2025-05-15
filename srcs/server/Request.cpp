@@ -15,7 +15,10 @@ Request::Request(std::string request, Server& server) :
 	//_queryString(""),
 	_path(""),
 	_headers(),
-	_body("")
+	_body(""),
+	_isChunked(false),
+	_expectedChunkSize(0),
+	_chunkedBody("")
 {
 	parseRequest();
 	setPathQueryString();
@@ -34,6 +37,7 @@ void Request::handleResponse()
 	response.setResponse(response.formatResponse());
 	std::cout << BLUE << "Sending response: [" << response.getResponse().substr(0, response.getResponse().length()) << "...]" << RESET << std::endl;
 }
+
 
 
 void Request::parseRequest()
@@ -56,15 +60,24 @@ void Request::parseRequest()
 		parseHeader(line);
 	}
 
+	// Vérifier si le transfert est en chunks
+	_isChunked = (getHeader("Transfer-Encoding") == "chunked");
+
+	std::cout << "Transfer-Encoding bb: " << getHeader("Transfer-Encoding") << std::endl;
 	// The rest is the request body
 	std::string body;
 	while (std::getline(ss, line)) {
 		body += line + "\n";
 	}
-	_body = body;
+	
+	if (_isChunked) {
+		std::cout << "Chunked request" << std::endl;
+		processChunkedData(body);
+	} else {
+		_body = body;
+	}
+	
 	std::cout << "Received request: [" << this->getBody().substr(0, this->getBody().length()) << "...]" << std::endl;
-	//handleResponse();
-
 }
 
 void Request::parseRequestLine(const std::string& line)
@@ -212,4 +225,57 @@ std::string Request::getFilename() const
             filename = _body.substr(endPos - pos);
     }
     return filename;
+}
+
+bool Request::processChunkedData(const std::string& chunk)
+{
+    std::cout << BLUE << "Traitement des données en chunks..." << RESET << std::endl;
+    std::stringstream ss(chunk);
+    std::string line;
+    
+    while (std::getline(ss, line)) {
+        // Supprimer le \r si présent
+        if (!line.empty() && line[line.length() - 1] == '\r') {
+            line = line.substr(0, line.length() - 1);
+            std::cout << YELLOW << "Caractère CR supprimé de la ligne" << RESET << std::endl;
+        }
+        
+        // Ignorer les lignes vides
+        if (line.empty()) {
+            continue;
+        }
+        
+        // Si nous attendons une taille de chunk
+        if (_expectedChunkSize == 0) {
+            _expectedChunkSize = parseChunkSize(line);
+            std::cout << GREEN << "Nouvelle taille de chunk détectée: " << _expectedChunkSize << RESET << std::endl;
+            
+            if (_expectedChunkSize == 0) {
+                // Fin du transfert
+                _body = _chunkedBody;
+                std::cout << GREEN << "Fin du transfert chunked, taille totale: " << _body.length() << " octets" << RESET << std::endl;
+                return true;
+            }
+        } else {
+            // Ajouter les données du chunk
+            _chunkedBody += line;
+            _expectedChunkSize -= line.length();
+            std::cout << BLUE << "Ajout de " << line.length() << " octets, reste " << _expectedChunkSize << " octets à lire" << RESET << std::endl;
+            
+            // Si nous avons reçu toutes les données du chunk
+            if (_expectedChunkSize == 0) {
+                std::cout << GREEN << "Chunk complet" << RESET << std::endl;
+            }
+        }
+    }
+    
+    return false;
+}
+
+size_t Request::parseChunkSize(const std::string& chunk)
+{
+	size_t size = 0;
+	std::stringstream ss(chunk);
+	ss >> std::hex >> size;
+	return size;
 }

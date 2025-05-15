@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test de Chunking - Get Lucky</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">Get Lucky</div>
+            <ul>
+                <li><a href="../">Accueil</a></li>
+                <li><a href="../#services">Services</a></li>
+                <li><a href="../#contact">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <div class="test-container">
+            <div class="test-header">
+                <h1>Test de Chunking</h1>
+                <p>Vérifiez le fonctionnement du transfert de données en chunks avec votre serveur web.</p>
+            </div>
+
+            <div class="input-group">
+                <label for="size">Taille des données (en MB)</label>
+                <input type="number" id="size" value="10" min="1" max="100" step="1">
+            </div>
+
+            <div class="input-group">
+                <label for="chunkSize">Taille des chunks (en KB)</label>
+                <input type="number" id="chunkSize" value="64" min="1" max="1024" step="1">
+            </div>
+
+            <button id="startTest" class="test-button">Démarrer le test</button>
+
+            <div class="progress-container">
+                <div class="progress-bar" id="progressBar"></div>
+                <div id="status" class="status-info">Prêt à tester</div>
+            </div>
+
+            <div class="logs-container">
+                <h3>Logs de traitement</h3>
+                <div id="logs" class="logs"></div>
+            </div>
+
+            <div class="test-info">
+                <p>Ce test va générer et simuler l'envoi de données en chunks sans utiliser de requêtes POST.</p>
+                <p>Conseils :</p>
+                <ul>
+                    <li>Ce test est une simulation uniquement (pas d'envoi réel)</li>
+                    <li>Les données sont générées localement dans votre navigateur</li>
+                    <li>Utile pour tester la génération de données volumineuses</li>
+                </ul>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        function generateRandomData(sizeInMB) {
+            const sizeInBytes = sizeInMB * 1024 * 1024;
+            const data = new Uint8Array(sizeInBytes);
+            const maxChunkSize = 65536; // 64KB - limite de crypto.getRandomValues
+            
+            for (let i = 0; i < sizeInBytes; i += maxChunkSize) {
+                const chunkSize = Math.min(maxChunkSize, sizeInBytes - i);
+                const chunk = new Uint8Array(chunkSize);
+                crypto.getRandomValues(chunk);
+                data.set(chunk, i);
+            }
+            
+            return data;
+        }
+
+        function updateStatus(message, type) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = `status-${type}`;
+        }
+
+        function addLog(message, type = 'info') {
+            const logs = document.getElementById('logs');
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry log-${type}`;
+            const timestamp = new Date().toLocaleTimeString();
+            logEntry.textContent = `[${timestamp}] ${message}`;
+            logs.insertBefore(logEntry, logs.firstChild);
+        }
+
+        async function simulateChunking(data, chunkSizeInKB) {
+            const chunkSize = chunkSizeInKB * 1024;
+            const totalChunks = Math.ceil(data.length / chunkSize);
+            let processedChunks = 0;
+            const progressBar = document.getElementById('progressBar');
+            const totalSize = (data.length / (1024 * 1024)).toFixed(2);
+
+            addLog(`Démarrage de la simulation - Taille totale: ${totalSize} MB`, 'info');
+            addLog(`Taille des chunks: ${chunkSizeInKB} KB`, 'info');
+            addLog(`Nombre total de chunks: ${totalChunks}`, 'info');
+
+            return new Promise((resolve) => {
+                function processNextChunk() {
+                    if (processedChunks >= totalChunks) {
+                        addLog('Simulation terminée avec succès', 'success');
+                        resolve(true);
+                        return;
+                    }
+
+                    const start = processedChunks * chunkSize;
+                    const end = Math.min(start + chunkSize, data.length);
+                    const chunk = data.slice(start, end);
+                    const chunkSizeMB = (chunk.length / (1024 * 1024)).toFixed(2);
+                    
+                    addLog(`Traitement du chunk ${processedChunks + 1}/${totalChunks} (${chunkSizeMB} MB)`, 'info');
+                    
+                    // Simuler un délai de traitement
+                    setTimeout(() => {
+                        processedChunks++;
+                        const progress = (processedChunks / totalChunks) * 100;
+                        progressBar.style.width = `${progress}%`;
+                        updateStatus(`Traitement en cours... ${Math.round(progress)}%`, 'info');
+                        processNextChunk();
+                    }, 50);
+                }
+
+                processNextChunk();
+            });
+        }
+
+        document.getElementById('startTest').addEventListener('click', async function() {
+            const button = this;
+            const sizeInput = document.getElementById('size');
+            const chunkSizeInput = document.getElementById('chunkSize');
+            const progressBar = document.getElementById('progressBar');
+            const logs = document.getElementById('logs');
+            logs.innerHTML = ''; // Nettoyer les logs précédents
+
+            button.disabled = true;
+            updateStatus('Génération des données...', 'info');
+            progressBar.style.width = '0%';
+
+            try {
+                const size = parseInt(sizeInput.value);
+                const chunkSize = parseInt(chunkSizeInput.value);
+
+                addLog('Génération des données aléatoires...', 'info');
+                const data = generateRandomData(size);
+                addLog('Données générées avec succès', 'success');
+                
+                updateStatus('Simulation du chunking...', 'info');
+                await simulateChunking(data, chunkSize);
+                
+                updateStatus('Simulation terminée avec succès!', 'success');
+                progressBar.style.width = '100%';
+            } catch (error) {
+                addLog(`Erreur: ${error.message}`, 'error');
+                updateStatus('Erreur: ' + error.message, 'error');
+            } finally {
+                button.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
