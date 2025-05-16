@@ -32,6 +32,7 @@ void Request::handleResponse()
 	_server.executeMethods(*this, response);
 	response.setResponse(response.formatResponse());
 	std::cout << BLUE << "Sending response: [" << response.getResponse().substr(0, response.getResponse().length()) << "...]" << RESET << std::endl;
+
 }
 
 
@@ -40,7 +41,7 @@ void Request::parseRequest()
 	std::stringstream ss(_request);
 	std::string line;
 
-	// Parse la première ligne (méthode, URL, version)
+	// Parse first line (request line)
 	if (std::getline(ss, line) && !line.empty()) {
 		parseRequestLine(line);
 		std::cout << "method: " << _method << std::endl;
@@ -48,10 +49,11 @@ void Request::parseRequest()
 		std::cout << "http version: " << _httpVersion << std::endl;
 	}
 
-	// Parse les en-têtes
+	// Parse headers
 	while (std::getline(ss, line) && !line.empty() && line != "\r") {
 		if (!line.empty() && line[line.length() - 1] == '\r')
 			line = line.substr(0, line.length() - 1); // Remove CR if present
+		std::cout << "Parsing header: " << line << std::endl;
 		parseHeader(line);
 	}
 
@@ -62,12 +64,14 @@ void Request::parseRequest()
 	}
 	_body = body;
 	std::cout << "Received request: [" << this->getBody().substr(0, this->getBody().length()) << "...]" << std::endl;
-	//handleResponse();
 
 }
 
 void Request::parseRequestLine(const std::string& line)
 {
+	std::cout << "Parsing request line: " << line << std::endl;
+
+	std::cout << " size: " << line.size() << std::endl;
 	std::istringstream iss(line);
 	iss >> _method >> _uri >> _httpVersion;
 	// Remove "\r" if present in the HTTP version
@@ -200,7 +204,7 @@ void Request::fillResponse(Response& response, int statusCode, const std::string
 std::string Request::getFilename() const
 {
     std::string filename;
-    size_t pos = _body.find("filename=\""); //std::string::size_type pos
+    size_t pos = _body.find("filename=\"");
 
     if (pos != std::string::npos)
     {
@@ -208,7 +212,7 @@ std::string Request::getFilename() const
         pos += 10; //skip filename="
         size_t endPos = _body.find("\"", pos);//start find frm pos
         if (endPos != std::string::npos)
-            filename = _body.substr(endPos - pos);
+            filename = _body.substr(pos, endPos - pos); // FIX: Extract correct substring
     }
     return filename;
 }

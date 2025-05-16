@@ -11,7 +11,7 @@ int main(int argc, char const *argv[])
 	{
 		if (argc <= 2)
 		{
-			const std::string configFile = (argc == 1 ? "config/baseConfig.txt" : argv[1]);
+			const std::string configFile = (argc == 1 ? "./config/baseConfig.txt" : argv[1]);
 			Config config(configFile);
 
 			config.runServers();
