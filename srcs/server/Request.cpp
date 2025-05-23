@@ -93,7 +93,8 @@ void Request::openErrorPage(size_t code, Response& response)
     // Ajouter Content-Type pour HTML
     std::map<std::string, std::string> headers = this->getHeaders();
 	Location* loc = _server.getCurrentLocation(_path);
-	std::cout << "loc->getErrorPage().find(code)->second.c_str() : " << loc->getErrorPage().find(code)->second.c_str() << std::endl;
+	std::cout << "loc->getRedirections().find(code)->second.c_str() : " << loc->getRedirections().find(301)->second << std::endl;
+	std::cout << "loc->getErrorPage().find(code)->second.c_str() : " << loc->getErrorPage().find(405)->second << std::endl;
 	if (loc->getErrorPage().find(code) != loc->getErrorPage().end())
 		_uri = loc->getErrorPage().find(code)->second.c_str();
 	else

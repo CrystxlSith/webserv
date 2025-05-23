@@ -11,7 +11,7 @@ server {
         methods POST ;
         index index.html;
         client_max_body_size 10M;
-        error_page 405 /errors/405_Method-Not-Allowed.html;
+        error_page 405 /errors/405_Method-Not-Allowed-root.html;
         return 301 http://localhost:8080;
     }
 

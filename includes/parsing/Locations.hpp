@@ -34,8 +34,7 @@ public:
 	void setUploadPath(const std::string& upload_path) {_upload_path = upload_path;};
 	void setIndex(const std::string& index) {_index = index;};
 	void setErrorPage(const std::pair<size_t, std::string>& error_page) { 
-		std::string newPath = error_page.second;  // Créer une nouvelle copie de la chaîne
-		_error_page[error_page.first] = newPath;  // Utiliser operator[] au lieu de insert
+		_error_page.insert(error_page);  // Utiliser insert au lieu de operator[]
 	};
 	void setMethods(const std::vector<std::string>& methods) {_methods = methods;};
 	void setRedirections(const std::pair<size_t, std::string>& redirections) { _redirections.insert(redirections);};
