@@ -65,16 +65,16 @@ server {
 - [x] Gestion des headers
 
 ### 3. Fonctionnalités Core
-- [ ] Gestion des méthodes HTTP (GET, POST, DELETE)
-- [ ] Gestion des fichiers statiques
-- [ ] Configuration dynamique
-- [ ] Pages d'erreur
+- [x] Gestion des méthodes HTTP (GET, POST, DELETE)
+- [x] Gestion des fichiers statiques
+- [x] Configuration dynamique
+- [x] Pages d'erreur
 
 ### 4. Fonctionnalités Avancées
-- [ ] Support CGI
-- [ ] Upload de fichiers
-- [ ] Directory listing
-- [ ] Redirections
+- [x] Support CGI
+- [x] Upload de fichiers
+- [x] Directory listing
+- [x] Redirections
 
 ## 🧪 Tests
 Pour tester le serveur:
@@ -96,8 +96,8 @@ curl http://localhost:8080
 - [NGINX Begginner Guide](https://nginx.org/en/docs/beginners_guide.html)
 
 ## ⚠️ Notes Importantes
-- Le serveur doit rester disponible sous forte charge
-- Toutes les opérations I/O doivent être non-bloquantes
+- Le serveur peut rester disponible sous forte charge
+- Toutes les opérations I/O sont non-bloquantes
 - La gestion des erreurs doit être robuste
 - Le code doit être conforme à la norme C++98
 
@@ -109,9 +109,3 @@ Ce projet est développé par:
 
 ## 📄 Licence
 42
-
-dd if=/dev/zero of=large_file.txt bs=1M count=10
-curl -v -o downloaded_file.txt http://localhost:8080/upload/large_file.txt
-
-test sans methode : echo -e " / HTTP/1.1\r\nHost: localhost:8080\r\n\r\n" | nc localhost 8080
-stress test siege :  siege -b -c 255 -t1M http://127.0.0.1:8080/
